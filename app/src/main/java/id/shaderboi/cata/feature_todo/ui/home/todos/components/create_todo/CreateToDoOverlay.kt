@@ -6,7 +6,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusOrder
@@ -19,8 +22,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.navigationBarsWithImePadding
+import id.shaderboi.cata.feature_todo.domain.model.ToDoPriority
+import id.shaderboi.cata.feature_todo.ui.common.components.SelectDialog
 import id.shaderboi.cata.feature_todo.ui.home.HomeViewModel
 
 @Composable
@@ -32,6 +36,9 @@ fun CreateToDoOverlay(
     var textDescription by remember { mutableStateOf("") }
     val titleFocusRequester = remember { FocusRequester() }
     val descriptionFocusRequester = remember { FocusRequester() }
+
+    var selectingPriority by remember { mutableStateOf(false) }
+    val selectedPriority = remember { mutableStateOf(0) }
 
     val fontSize = 25.sp
     val fontWeight = FontWeight.Bold
@@ -136,18 +143,34 @@ fun CreateToDoOverlay(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(
-                                    horizontal = 5.dp,
+                                    horizontal = 15.dp,
                                     vertical = 8.dp
                                 ),
-                            horizontalArrangement = Arrangement.End
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
+                            IconButton(
+                                onClick = {
+                                    selectingPriority = true
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Flag,
+                                    contentDescription = "Select priority",
+                                    tint = ToDoPriority.values()[selectedPriority.value].color
+                                )
+                            }
+
                             Button(
                                 onClick = {
-                                    toDosViewModel.createToDo(textTitle, textDescription)
+                                    toDosViewModel.createToDo(
+                                        textTitle,
+                                        textDescription,
+                                        ToDoPriority.values()[selectedPriority.value]
+                                    )
                                         .invokeOnCompletion {
                                             homeViewModel.toggleToDoModal()
                                         }
-                                }
+                                },
                             ) {
                                 Text("Add")
                             }
@@ -157,4 +180,49 @@ fun CreateToDoOverlay(
             }
         }
     }
+
+    if (selectingPriority) {
+        SelectDialog(
+            selectedIndex = selectedPriority,
+            options = ToDoPriority.values(),
+            title = {
+                Text("Select priority", fontWeight = FontWeight.Medium, fontSize = 20.sp)
+            },
+            onDismissRequest = {
+                selectingPriority = false
+            },
+            onClick = {
+                selectingPriority = false
+            },
+            itemComponent = { idx, selectedIdx, option, onItemClick ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onItemClick() }
+                        .padding(horizontal = 10.dp, vertical = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = idx == selectedIdx,
+                        onClick = onItemClick
+                    )
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            text = option.toString()
+                        )
+                        Icon(
+                            imageVector = Icons.Default.Flag,
+                            contentDescription = "Priority $option",
+                            tint = option.color
+                        )
+                    }
+                }
+            }
+        )
+    }
+
 }

@@ -8,13 +8,13 @@ data class ToDo(
     @PrimaryKey(autoGenerate = true) val id: Int,
     val title: String,
     val content: String,
-    val color: Int,
+    val priority: ToDoPriority,
     val timestamp: Long
 ) {
     constructor(
         title: String,
         content: String,
-        color: Int,
+        priority: ToDoPriority,
         timestamp: Long
-    ) : this(0, title, content, color, timestamp)
+    ) : this(0, title, content, priority, timestamp)
 }

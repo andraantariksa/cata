@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -35,7 +36,7 @@ sealed class ToDoDismissAction(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ToDo(
+fun ToDoItem(
     appState: AppState,
     homeState: HomeState,
     toDo: ToDo,
@@ -79,13 +80,23 @@ fun ToDo(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp)
+                modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Checkbox(checked = false, onCheckedChange = {})
-                Text(
-                    toDo.title,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 20.sp
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Checkbox(checked = false, onCheckedChange = {})
+                    Text(
+                        toDo.title,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 20.sp
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Default.Flag,
+                    contentDescription = "Priority ${toDo.priority.name}",
+                    tint = toDo.priority.color
                 )
             }
         }
