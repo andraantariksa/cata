@@ -40,7 +40,8 @@ fun <T> SelectDialog(
 ) {
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
-            shape = MaterialTheme.shapes.medium
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colors.background
         ) {
             Column {
                 Box(

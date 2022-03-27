@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import id.shaderboi.cata.feature_todo.ui.AppState
 import id.shaderboi.cata.feature_todo.ui.home.misc.MiscScreen
 import id.shaderboi.cata.feature_todo.ui.home.todos.ToDosScreen
+import id.shaderboi.cata.feature_todo.ui.home.view_model.HomeState
 
 @Composable
 fun HomeNavigation(appState: AppState, homeState: HomeState) {

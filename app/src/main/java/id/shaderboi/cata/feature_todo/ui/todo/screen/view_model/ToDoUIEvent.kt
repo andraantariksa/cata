@@ -1,4 +1,4 @@
-package id.shaderboi.cata.feature_todo.ui.todo.screen
+package id.shaderboi.cata.feature_todo.ui.todo.screen.view_model
 
 import androidx.compose.material.SnackbarDuration
 

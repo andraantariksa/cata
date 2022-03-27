@@ -1,4 +1,4 @@
-package id.shaderboi.cata.feature_todo.ui.home
+package id.shaderboi.cata.feature_todo.ui.home.view_model
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf

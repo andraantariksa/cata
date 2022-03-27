@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Flag
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusOrder
 import androidx.compose.ui.focus.focusRequester
@@ -25,23 +26,22 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import id.shaderboi.cata.feature_todo.domain.model.ToDoPriority
 import id.shaderboi.cata.feature_todo.ui.common.components.SelectDialog
-import id.shaderboi.cata.feature_todo.ui.home.HomeViewModel
+import id.shaderboi.cata.feature_todo.ui.home.view_model.HomeViewModel
 
 @Composable
 fun CreateToDoOverlay(
     homeViewModel: HomeViewModel,
-    toDosViewModel: CreateToDoViewModel = hiltViewModel()
+    createToDoViewModel: CreateToDoViewModel = hiltViewModel()
 ) {
-    var textTitle by remember { mutableStateOf("") }
-    var textDescription by remember { mutableStateOf("") }
+    val createToDoState = createToDoViewModel.toDo.value
+    val textTitle = createToDoState.title
+    val textDescription = createToDoState.description
+
     val titleFocusRequester = remember { FocusRequester() }
     val descriptionFocusRequester = remember { FocusRequester() }
 
     var selectingPriority by remember { mutableStateOf(false) }
     val selectedPriority = remember { mutableStateOf(0) }
-
-    val fontSize = 25.sp
-    val fontWeight = FontWeight.Bold
 
     val density = LocalDensity.current
 
@@ -81,12 +81,12 @@ fun CreateToDoOverlay(
                     Column {
                         TextField(
                             value = textTitle,
-                            onValueChange = {
-                                if (it.lastOrNull() == '\n') {
+                            onValueChange = { text ->
+                                if (text.lastOrNull() == '\n') {
                                     descriptionFocusRequester.requestFocus()
                                     return@TextField
                                 }
-                                textTitle = it
+                                createToDoViewModel.onEvent(CreateToDoEvent.ChangedTitle(text))
                             },
                             modifier = Modifier
                                 .defaultMinSize(
@@ -106,20 +106,21 @@ fun CreateToDoOverlay(
                                 .focusOrder(titleFocusRequester)
                                 .focusRequester(titleFocusRequester),
                             placeholder = {
-                                Text("Title", fontSize = fontSize, fontWeight = fontWeight)
+                                Text("Title", fontSize = 25.sp, fontWeight = FontWeight.Bold)
                             },
                             textStyle = LocalTextStyle.current.copy(
-                                fontSize = fontSize,
-                                fontWeight = fontWeight
+                                fontSize = 25.sp,
+                                fontWeight = FontWeight.Bold
                             ),
                             colors = TextFieldDefaults.textFieldColors(
                                 backgroundColor = Color.Transparent
                             ),
+                            readOnly = createToDoViewModel.isLoading.value
                         )
                         TextField(
                             value = textDescription,
-                            onValueChange = {
-                                textDescription = it
+                            onValueChange = { text ->
+                                createToDoViewModel.onEvent(CreateToDoEvent.ChangedDescription(text))
                             },
                             modifier = Modifier
                                 .defaultMinSize(
@@ -138,6 +139,7 @@ fun CreateToDoOverlay(
                                 unfocusedIndicatorColor = Color.Transparent,
                                 disabledIndicatorColor = Color.Transparent
                             ),
+                            readOnly = createToDoViewModel.isLoading.value
                         )
                         Row(
                             modifier = Modifier
@@ -150,27 +152,38 @@ fun CreateToDoOverlay(
                         ) {
                             IconButton(
                                 onClick = {
-                                    selectingPriority = true
+                                    if (!createToDoViewModel.isLoading.value) {
+                                        selectingPriority = true
+                                    }
                                 }
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Flag,
                                     contentDescription = "Select priority",
-                                    tint = ToDoPriority.values()[selectedPriority.value].color
+                                    tint = ToDoPriority.values()[selectedPriority.value].color,
                                 )
                             }
 
                             Button(
                                 onClick = {
-                                    toDosViewModel.createToDo(
-                                        textTitle,
-                                        textDescription,
-                                        ToDoPriority.values()[selectedPriority.value]
-                                    )
-                                        .invokeOnCompletion {
+                                    createToDoViewModel.onEvent(
+                                        CreateToDoEvent.CreateToDo {
                                             homeViewModel.toggleToDoModal()
                                         }
+                                    )
                                 },
+                                modifier = Modifier
+                                    .alpha(
+                                        if (
+                                            !createToDoViewModel.isLoading.value &&
+                                            createToDoViewModel.isCanAdd.value
+                                        )
+                                            1.0F
+                                        else
+                                            0.5F
+                                    ),
+                                enabled = !createToDoViewModel.isLoading.value &&
+                                        createToDoViewModel.isCanAdd.value
                             ) {
                                 Text("Add")
                             }

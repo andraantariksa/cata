@@ -1,11 +1,17 @@
 package id.shaderboi.cata.feature_todo.ui.todo.screen
 
-import id.shaderboi.cata.feature_todo.ui.todo.components.BottomAppBar
-import androidx.compose.foundation.layout.*
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -20,6 +26,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.shaderboi.cata.feature_todo.domain.util.Resource
 import id.shaderboi.cata.feature_todo.ui.AppState
+import id.shaderboi.cata.feature_todo.ui.todo.components.BottomAppBar
+import id.shaderboi.cata.feature_todo.ui.todo.screen.view_model.ToDoEvent
+import id.shaderboi.cata.feature_todo.ui.todo.screen.view_model.ToDoUIEvent
+import id.shaderboi.cata.feature_todo.ui.todo.screen.view_model.ToDoViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -29,7 +40,7 @@ import kotlinx.coroutines.launch
 fun ToDoScreen(
     appState: AppState,
     toDoId: Int,
-    toDoViewModel: ToDoViewModel = hiltViewModel()
+    toDoViewModel: ToDoViewModel = hiltViewModel(),
 ) {
     val scaffoldState = rememberScaffoldState()
     val titleFocusRequester = remember { FocusRequester() }
@@ -39,13 +50,17 @@ fun ToDoScreen(
     val fontSize = 25.sp
     val fontWeight = FontWeight.Bold
 
+    BackHandler {
+        toDoViewModel.onEvent(ToDoEvent.Save(appState.appScope))
+        appState.navHostController.popBackStack()
+    }
+
     LaunchedEffect(Unit) {
-        launch {
+        launch(Dispatchers.IO) {
             toDoViewModel.onEvent(ToDoEvent.Load(toDoId))
-//            titleFocusRequester.requestFocus()
         }
 
-        launch {
+        launch(Dispatchers.Main) {
             toDoViewModel.uiEvent.collectLatest { event ->
                 when (event) {
                     ToDoUIEvent.CloseToDoScreen -> {
@@ -71,22 +86,45 @@ fun ToDoScreen(
 
     Scaffold(
         scaffoldState = scaffoldState,
-        isFloatingActionButtonDocked = true,
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    toDoViewModel.onEvent(ToDoEvent.Save(toDoId))
-                }
-            ) {
-                Icon(imageVector = Icons.Default.Save, contentDescription = "Save")
-            }
-        },
         bottomBar = {
-            BottomAppBar(appState = appState)
+            when (val state = toDoViewModel.toDoState.value) {
+                is Resource.Loaded -> {
+                    BottomAppBar(appState = appState) {
+                        if (appState.navHostController.previousBackStackEntry != null) {
+                            IconButton(
+                                onClick = {
+                                    toDoViewModel.onEvent(ToDoEvent.Save(appState.appScope))
+                                    appState.navHostController.popBackStack()
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowBack,
+                                    contentDescription = "Back"
+                                )
+                            }
+                        }
+
+                        TextButton(
+                            onClick = {
+                                toDoViewModel.onEvent(ToDoEvent.InvertCheck)
+                                toDoViewModel.onEvent(ToDoEvent.Save(appState.appScope))
+                            }
+                        ) {
+                            Text(
+                                if (state.data.checked)
+                                    "Mark as incomplete"
+                                else
+                                    "Mark as complete"
+                            )
+                        }
+                    }
+                }
+                else -> {}
+            }
         },
 //        modifier = Modifier.padding(5.dp)
     ) {
-        val state = toDoViewModel.noteState.value
+        val state = toDoViewModel.toDoState.value
         when (state) {
             is Resource.Error -> {
                 Column {

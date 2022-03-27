@@ -1,24 +1,24 @@
 package id.shaderboi.cata.feature_todo.ui
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.preferencesDataStore
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import id.shaderboi.cata.ui.theme.Theme
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun rememberAppState(
-    navHostController: NavHostController = rememberNavController()
-) = remember(navHostController) {
+    navHostController: NavHostController = rememberNavController(),
+    appScope: CoroutineScope = rememberCoroutineScope()
+) = remember(navHostController, appScope) {
     AppState(
-        navHostController = navHostController
+        navHostController = navHostController,
+        appScope = appScope
     )
 }
 
 data class AppState(
-    val navHostController: NavHostController
+    val navHostController: NavHostController,
+    val appScope: CoroutineScope
 )

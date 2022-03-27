@@ -1,15 +1,10 @@
 package id.shaderboi.cata.feature_todo.ui.todo.components
 
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -29,22 +24,24 @@ private val TitleIconModifier = Modifier
     .width(72.dp - AppBarHorizontalPadding)
 
 @Composable
-fun BottomAppBar(appState: AppState) = androidx.compose.material.BottomAppBar(
+fun BottomAppBar(
+    appState: AppState,
+    Content: @Composable () -> Unit
+) = androidx.compose.material.BottomAppBar(
     cutoutShape = RoundedCornerShape(50.dp),
 ) {
     Row(TitleIconModifier, verticalAlignment = Alignment.CenterVertically) {
-        CompositionLocalProvider(
-            LocalContentAlpha provides ContentAlpha.high,
-            content = {
-                if (appState.navHostController.previousBackStackEntry != null) {
-                    IconButton(onClick = { appState.navHostController.navigateUp() }) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                }
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.high) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(AppBarDefaults.ContentPadding)
+                    .height(AppBarHeight),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Content()
             }
-        )
+        }
     }
 }

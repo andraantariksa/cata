@@ -1,13 +1,14 @@
 package id.shaderboi.cata.feature_todo.ui.home.todos.components.create_todo
 
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import id.shaderboi.cata.feature_todo.domain.model.ToDo
-import id.shaderboi.cata.feature_todo.domain.model.ToDoPriority
 import id.shaderboi.cata.feature_todo.domain.use_case.ToDoUseCases
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -15,26 +16,60 @@ import javax.inject.Inject
 class CreateToDoViewModel @Inject constructor(
     private val toDoUseCase: ToDoUseCases
 ) : ViewModel() {
-    private val _isLoading = mutableStateOf(false)
-    val isLoading get() = _isLoading
+    private val _toDo = mutableStateOf(ToDo())
+    val toDo: State<ToDo> = _toDo
 
-    fun createToDo(title: String, content: String, priority: ToDoPriority): Job {
-        _isLoading.value = true
-        return viewModelScope.launch {
-            try {
-                toDoUseCase.insertToDo(
-                    ToDo(
-                        title,
-                        content,
-                        priority,
-                        System.currentTimeMillis()
-                    )
+    private val _isLoading = mutableStateOf(false)
+    val isLoading: State<Boolean> = _isLoading
+
+    private val _isCanAdd = mutableStateOf(false)
+    val isCanAdd: State<Boolean> = _isCanAdd
+
+    private val _uiEvent = MutableSharedFlow<CreateToDoUIEvent>()
+    val uiEvent = _uiEvent.asSharedFlow()
+
+    fun onEvent(event: CreateToDoEvent) {
+        when (event) {
+            is CreateToDoEvent.ChangedDescription -> {
+                _toDo.value = _toDo.value.copy(
+                    description = event.text,
                 )
+
+                checkAddAvailability()
+            }
+            is CreateToDoEvent.ChangedTitle -> {
+                _toDo.value = _toDo.value.copy(
+                    title = event.text,
+                )
+
+                checkAddAvailability()
+            }
+            is CreateToDoEvent.CreateToDo -> createToDo(event.onCompletion)
+        }
+    }
+
+    private fun createToDo(
+        onCompletion: () -> Unit,
+    ) {
+        _isLoading.value = true
+        viewModelScope.launch {
+            try {
+                toDoUseCase.insertToDo(toDo.value)
+                _toDo.value = ToDo()
             } catch (ex: Exception) {
-                throw ex;
+                throw ex
             } finally {
                 _isLoading.value = false
             }
+        }.invokeOnCompletion {
+            onCompletion()
+        }
+    }
+
+    private fun checkAddAvailability() {
+        val availability = toDo.value.title.isNotBlank()
+        if (availability != isCanAdd.value) {
+            _isCanAdd.value = availability
         }
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,8 +20,9 @@ import androidx.compose.ui.unit.sp
 import id.shaderboi.cata.feature_todo.domain.model.ToDo
 import id.shaderboi.cata.feature_todo.ui.AppState
 import id.shaderboi.cata.feature_todo.ui.RootNavigationGraph
-import id.shaderboi.cata.feature_todo.ui.home.HomeState
-import id.shaderboi.cata.feature_todo.ui.home.todos.ToDosViewModel
+import id.shaderboi.cata.feature_todo.ui.home.todos.view_model.ToDosEvent
+import id.shaderboi.cata.feature_todo.ui.home.todos.view_model.ToDosViewModel
+import id.shaderboi.cata.feature_todo.ui.home.view_model.HomeState
 
 sealed class ToDoDismissAction(
     val imageVector: ImageVector,
@@ -43,6 +45,14 @@ fun ToDoItem(
     toDosViewModel: ToDosViewModel
 ) {
     val dismissState = rememberDismissState()
+
+    val isDeleted = dismissState.isDismissed(DismissDirection.EndToStart)
+    LaunchedEffect(isDeleted) {
+        if (isDeleted) {
+            toDosViewModel.onEvent(ToDosEvent.Delete(toDo))
+        }
+    }
+
     SwipeToDismiss(
         state = dismissState,
         background = {
@@ -86,7 +96,12 @@ fun ToDoItem(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Checkbox(checked = false, onCheckedChange = {})
+                    Checkbox(
+                        checked = toDo.checked,
+                        onCheckedChange = {
+                            toDosViewModel.onEvent(ToDosEvent.ToggleToDoCheck(toDo))
+                        }
+                    )
                     Text(
                         toDo.title,
                         fontWeight = FontWeight.Medium,
