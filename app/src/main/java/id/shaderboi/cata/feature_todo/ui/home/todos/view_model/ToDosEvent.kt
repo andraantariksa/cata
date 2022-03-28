@@ -9,4 +9,5 @@ sealed class ToDosEvent {
     object RestoreToDos : ToDosEvent()
     class OnSearchTextChange(val string: String) : ToDosEvent()
     class ToggleToDoCheck(val toDo: ToDo) : ToDosEvent()
+    object ToggleSortToDoModal : ToDosEvent()
 }

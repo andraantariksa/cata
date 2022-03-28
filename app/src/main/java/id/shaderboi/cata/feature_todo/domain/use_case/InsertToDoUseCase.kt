@@ -2,10 +2,10 @@ package id.shaderboi.cata.feature_todo.domain.use_case
 
 import id.shaderboi.cata.feature_todo.domain.exception.InvalidNoteException
 import id.shaderboi.cata.feature_todo.domain.model.ToDo
-import id.shaderboi.cata.feature_todo.domain.repository.NoteRepository
+import id.shaderboi.cata.feature_todo.domain.repository.ToDoRepository
 
 class InsertToDoUseCase(
-    private val repository: NoteRepository
+    private val repository: ToDoRepository
 ) {
     @Throws(InvalidNoteException::class)
     suspend operator fun invoke(

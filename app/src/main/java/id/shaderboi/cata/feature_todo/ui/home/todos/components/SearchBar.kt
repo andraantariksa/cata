@@ -57,7 +57,7 @@ fun SearchBar(
                 )
             }
             TextField(
-                value = toDosViewModel.toDos.value.searchQuery,
+                value = toDosViewModel.toDosState.value.searchQuery,
                 onValueChange = { text ->
                     toDosViewModel.onEvent(ToDosEvent.OnSearchTextChange(text))
                 },

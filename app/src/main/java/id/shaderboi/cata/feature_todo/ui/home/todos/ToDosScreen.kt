@@ -22,6 +22,7 @@ import id.shaderboi.cata.feature_todo.ui.AppState
 import id.shaderboi.cata.feature_todo.ui.home.todos.components.FloatingActionButton
 import id.shaderboi.cata.feature_todo.ui.home.todos.components.ToDoItem
 import id.shaderboi.cata.feature_todo.ui.home.todos.components.TopBar
+import id.shaderboi.cata.feature_todo.ui.home.todos.components.sort_todo.SortToDoModal
 import id.shaderboi.cata.feature_todo.ui.home.todos.view_model.ToDosUIEvent
 import id.shaderboi.cata.feature_todo.ui.home.todos.view_model.ToDosViewModel
 import id.shaderboi.cata.feature_todo.ui.home.view_model.HomeState
@@ -71,7 +72,7 @@ fun ToDosScreen(
             BottomAppBar {}
         }
     ) {
-        if (toDosViewModel.toDos.value.toDos.isEmpty() && toDosViewModel.toDos.value.searchQuery.isBlank()) {
+        if (toDosViewModel.toDosState.value.toDos.isEmpty() && toDosViewModel.toDosState.value.searchQuery.isBlank()) {
             val emptyComposition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.empty))
             Column(
                 verticalArrangement = Arrangement.Center,
@@ -94,7 +95,7 @@ fun ToDosScreen(
                     textAlign = TextAlign.Center
                 )
             }
-        } else if (toDosViewModel.toDos.value.toDos.isEmpty() && toDosViewModel.toDos.value.searchQuery.isNotBlank()) {
+        } else if (toDosViewModel.toDosState.value.toDos.isEmpty() && toDosViewModel.toDosState.value.searchQuery.isNotBlank()) {
             val notFoundComposition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.no_result_found))
             Column(
                 verticalArrangement = Arrangement.Center,
@@ -122,15 +123,17 @@ fun ToDosScreen(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                items(toDosViewModel.toDos.value.toDos.size) { toDoIdx ->
+                items(toDosViewModel.toDosState.value.toDos.size) { toDoIdx ->
                     ToDoItem(
                         appState = appState,
                         homeState = homeState,
-                        toDo = toDosViewModel.toDos.value.toDos[toDoIdx],
+                        toDo = toDosViewModel.toDosState.value.toDos[toDoIdx],
                         toDosViewModel = toDosViewModel
                     )
                 }
             }
         }
     }
+
+    SortToDoModal(toDosViewModel = toDosViewModel)
 }

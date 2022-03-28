@@ -1,13 +1,12 @@
 package id.shaderboi.cata.feature_todo.domain.repository
 
 import id.shaderboi.cata.feature_todo.domain.model.ToDo
-import id.shaderboi.cata.feature_todo.domain.util.Order
 import id.shaderboi.cata.feature_todo.domain.util.ToDoOrder
 import kotlinx.coroutines.flow.Flow
 
-interface NoteRepository {
+interface ToDoRepository {
     fun getToDo(
-        order: ToDoOrder = ToDoOrder.Date(Order.Descending),
+        orderField: ToDoOrder,
         searchQuery: String? = null
     ): Flow<List<ToDo>>
 

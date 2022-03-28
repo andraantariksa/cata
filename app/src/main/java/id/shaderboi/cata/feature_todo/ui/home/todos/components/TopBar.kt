@@ -16,6 +16,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import id.shaderboi.cata.feature_todo.ui.home.todos.view_model.ToDosEvent
 import id.shaderboi.cata.feature_todo.ui.home.todos.view_model.ToDosViewModel
 
 @Composable
@@ -60,7 +61,7 @@ fun TopBar(toDosViewModel: ToDosViewModel) {
                     }
                     IconButton(
                         onClick = {
-
+                            toDosViewModel.onEvent(ToDosEvent.ToggleSortToDoModal)
                         }
                     ) {
                         Icon(imageVector = Icons.Default.Sort, contentDescription = "Sort")

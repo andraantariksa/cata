@@ -7,8 +7,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import id.shaderboi.cata.feature_todo.domain.model.ToDo
 import id.shaderboi.cata.feature_todo.domain.use_case.ToDoUseCases
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,9 +22,6 @@ class CreateToDoViewModel @Inject constructor(
 
     private val _isCanAdd = mutableStateOf(false)
     val isCanAdd: State<Boolean> = _isCanAdd
-
-    private val _uiEvent = MutableSharedFlow<CreateToDoUIEvent>()
-    val uiEvent = _uiEvent.asSharedFlow()
 
     fun onEvent(event: CreateToDoEvent) {
         when (event) {

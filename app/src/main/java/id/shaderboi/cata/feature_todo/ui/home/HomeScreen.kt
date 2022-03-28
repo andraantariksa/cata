@@ -20,7 +20,6 @@ fun HomeScreen(appState: AppState) {
         ) {
             HomeNavigation(appState = appState, homeState = homeState)
         }
-//        SortToDoModal(homeViewModel = homeState.homeViewModel)
         CreateToDoOverlay(homeViewModel = homeState.homeViewModel)
     }
 }

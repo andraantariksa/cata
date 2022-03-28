@@ -22,8 +22,8 @@ import javax.inject.Inject
 class ToDosViewModel @Inject constructor(
     private val toDoUseCases: ToDoUseCases
 ) : ViewModel() {
-    private val _toDos = mutableStateOf(ToDosState())
-    val toDos: State<ToDosState> get() = _toDos
+    private val _toDosState = mutableStateOf(ToDosState())
+    val toDosState: State<ToDosState> get() = _toDosState
 
     private var lastDeletedToDo: ToDo? = null
 
@@ -35,17 +35,23 @@ class ToDosViewModel @Inject constructor(
 
     private var deleteJob: Job? = null
 
+    private val _isSortToDoModalOpened = mutableStateOf(false)
+    val isSortToDoModalOpened: State<Boolean> = _isSortToDoModalOpened
+
     init {
-        getToDo(toDos.value.toDoOrder)
+        getToDo(toDosState.value.toDoOrder)
     }
 
     fun onEvent(event: ToDosEvent) {
         when (event) {
             is ToDosEvent.Delete -> deleteToDo(event.toDo)
             is ToDosEvent.Order -> {
-                if (toDos.value.toDoOrder == event.toDoOrder) {
+                if (toDosState.value.toDoOrder == event.toDoOrder) {
                     return
                 }
+
+                _toDosState.value = toDosState.value.copy(toDoOrder = event.toDoOrder)
+
                 getToDo(event.toDoOrder)
             }
             ToDosEvent.RestoreToDos -> {
@@ -55,15 +61,16 @@ class ToDosViewModel @Inject constructor(
                 }
             }
             is ToDosEvent.OnSearchTextChange -> {
-                _toDos.value = _toDos.value.copy(searchQuery = event.string)
+                _toDosState.value = _toDosState.value.copy(searchQuery = event.string)
 
                 searchInputNotesJob?.cancel()
                 searchInputNotesJob = viewModelScope.launch {
                     delay(1000)
-                    getToDo(toDos.value.toDoOrder, toDos.value.searchQuery)
+                    getToDo(toDosState.value.toDoOrder, toDosState.value.searchQuery)
                 }
             }
             is ToDosEvent.ToggleToDoCheck -> toggleToDoCheck(event.toDo)
+            ToDosEvent.ToggleSortToDoModal -> toggleSortModal()
         }
     }
 
@@ -97,11 +104,17 @@ class ToDosViewModel @Inject constructor(
         val searchQuery = _searchQuery?.ifBlank { null }
 
         getNotesJob = viewModelScope.launch(Dispatchers.IO) {
-            toDoUseCases.getToDos(toDoOrder, searchQuery).collectLatest { toDos ->
-                _toDos.value = _toDos.value.copy(
-                    toDos = toDos,
-                )
-            }
+            toDoUseCases
+                .getToDos(toDoOrder, searchQuery)
+                .collectLatest { toDos ->
+                    _toDosState.value = _toDosState.value.copy(
+                        toDos = toDos,
+                    )
+                }
         }
+    }
+
+    private fun toggleSortModal() {
+        _isSortToDoModalOpened.value = !_isSortToDoModalOpened.value
     }
 }

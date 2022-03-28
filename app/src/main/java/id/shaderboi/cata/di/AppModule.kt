@@ -7,8 +7,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import id.shaderboi.cata.feature_todo.data.data_source.ToDosDatabase
-import id.shaderboi.cata.feature_todo.data.repository.NoteRepositoryImpl
-import id.shaderboi.cata.feature_todo.domain.repository.NoteRepository
+import id.shaderboi.cata.feature_todo.data.repository.ToDoRepositoryImpl
+import id.shaderboi.cata.feature_todo.domain.repository.ToDoRepository
 import id.shaderboi.cata.feature_todo.domain.use_case.*
 import javax.inject.Singleton
 
@@ -23,13 +23,13 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideNoteRepository(db: ToDosDatabase): NoteRepository {
-        return NoteRepositoryImpl(db.toDoDao)
+    fun provideNoteRepository(db: ToDosDatabase): ToDoRepository {
+        return ToDoRepositoryImpl(db.toDoDao)
     }
 
     @Provides
     @Singleton
-    fun provideNoteUseCases(repository: NoteRepository): ToDoUseCases {
+    fun provideNoteUseCases(repository: ToDoRepository): ToDoUseCases {
         return ToDoUseCases(
             GetToDosUseCase(repository),
             GetToDoUseCase(repository),
