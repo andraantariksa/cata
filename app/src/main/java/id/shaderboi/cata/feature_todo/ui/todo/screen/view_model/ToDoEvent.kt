@@ -1,5 +1,6 @@
 package id.shaderboi.cata.feature_todo.ui.todo.screen.view_model
 
+import id.shaderboi.cata.feature_todo.domain.model.ToDoPriority
 import kotlinx.coroutines.CoroutineScope
 
 sealed class ToDoEvent {
@@ -7,5 +8,6 @@ sealed class ToDoEvent {
     class DescriptionTextInput(val text: String) : ToDoEvent()
     class Load(val id: Int) : ToDoEvent()
     class Save(val coroutineScope: CoroutineScope) : ToDoEvent()
+    class ChangePriority(val priority: ToDoPriority) : ToDoEvent()
     object InvertCheck : ToDoEvent()
 }

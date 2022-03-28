@@ -40,7 +40,7 @@ fun CreateToDoOverlay(
     val titleFocusRequester = remember { FocusRequester() }
     val descriptionFocusRequester = remember { FocusRequester() }
 
-    var selectingPriority by remember { mutableStateOf(false) }
+    var showSelectPriorityModal by remember { mutableStateOf(false) }
     val selectedPriority = remember { mutableStateOf(0) }
 
     val density = LocalDensity.current
@@ -153,7 +153,7 @@ fun CreateToDoOverlay(
                             IconButton(
                                 onClick = {
                                     if (!createToDoViewModel.isLoading.value) {
-                                        selectingPriority = true
+                                        showSelectPriorityModal = true
                                     }
                                 }
                             ) {
@@ -194,18 +194,19 @@ fun CreateToDoOverlay(
         }
     }
 
-    if (selectingPriority) {
+    if (showSelectPriorityModal) {
         SelectDialog(
-            selectedIndex = selectedPriority,
+            selectedIndex = selectedPriority.value,
             options = ToDoPriority.values(),
             title = {
                 Text("Select priority", fontWeight = FontWeight.Medium, fontSize = 20.sp)
             },
             onDismissRequest = {
-                selectingPriority = false
+                showSelectPriorityModal = false
             },
-            onClick = {
-                selectingPriority = false
+            onClick = { idx, selectedIdx, option ->
+                selectedPriority.value = idx
+                showSelectPriorityModal = false
             },
             itemComponent = { idx, selectedIdx, option, onItemClick ->
                 Row(

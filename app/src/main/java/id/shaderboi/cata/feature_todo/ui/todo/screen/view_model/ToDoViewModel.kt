@@ -86,6 +86,20 @@ class ToDoViewModel @Inject constructor(
                     }
                 }
             }
+            is ToDoEvent.ChangePriority -> {
+                when (val state = toDoState.value) {
+                    is Resource.Loaded<ToDo, Unit> -> {
+                        _toDoState.value = Resource.Loaded(
+                            state.data.copy(
+                                priority = event.priority
+                            )
+                        )
+                    }
+                    else -> {
+                        throw IllegalAccessError()
+                    }
+                }
+            }
             ToDoEvent.InvertCheck -> {
                 when (val state = toDoState.value) {
                     is Resource.Loaded<ToDo, Unit> -> {

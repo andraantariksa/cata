@@ -1,17 +1,13 @@
 package id.shaderboi.cata.feature_todo.ui.todo.screen
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.filled.Flag
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -22,10 +18,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.NativeKeyEvent
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import id.shaderboi.cata.feature_todo.domain.model.ToDoPriority
 import id.shaderboi.cata.feature_todo.domain.util.Resource
 import id.shaderboi.cata.feature_todo.ui.AppState
+import id.shaderboi.cata.feature_todo.ui.common.components.SelectDialog
 import id.shaderboi.cata.feature_todo.ui.todo.components.BottomAppBar
 import id.shaderboi.cata.feature_todo.ui.todo.screen.view_model.ToDoEvent
 import id.shaderboi.cata.feature_todo.ui.todo.screen.view_model.ToDoUIEvent
@@ -45,10 +44,9 @@ fun ToDoScreen(
     val scaffoldState = rememberScaffoldState()
     val titleFocusRequester = remember { FocusRequester() }
     val descriptionFocusRequester = remember { FocusRequester() }
-    val lockInput = remember { mutableStateOf(false) }
 
-    val fontSize = 25.sp
-    val fontWeight = FontWeight.Bold
+    var lockInput by remember { mutableStateOf(false) }
+    var selectingPriority by remember { mutableStateOf(false) }
 
     BackHandler {
         toDoViewModel.onEvent(ToDoEvent.Save(appState.appScope))
@@ -67,10 +65,10 @@ fun ToDoScreen(
                         appState.navHostController.popBackStack()
                     }
                     ToDoUIEvent.LockInput -> {
-                        lockInput.value = true
+                        lockInput = true
                     }
                     ToDoUIEvent.UnlockInput -> {
-                        lockInput.value = false
+                        lockInput = false
                     }
                     is ToDoUIEvent.ShowSnackBar -> {
                         scaffoldState.snackbarHostState.showSnackbar(
@@ -89,33 +87,56 @@ fun ToDoScreen(
         bottomBar = {
             when (val state = toDoViewModel.toDoState.value) {
                 is Resource.Loaded -> {
-                    BottomAppBar(appState = appState) {
-                        if (appState.navHostController.previousBackStackEntry != null) {
+                    BottomAppBar(
+                        navigationIcon = {
+                            if (appState.navHostController.previousBackStackEntry != null) {
+                                IconButton(
+                                    onClick = {
+                                        toDoViewModel.onEvent(ToDoEvent.Save(appState.appScope))
+                                        appState.navHostController.popBackStack()
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.ArrowBack,
+                                        contentDescription = "Back"
+                                    )
+                                }
+                            }
+                        }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
                             IconButton(
                                 onClick = {
+                                    selectingPriority = true
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Flag,
+                                    contentDescription = "Select priority",
+                                    tint = state.data.priority.color,
+                                )
+                            }
+
+                            TextButton(
+                                onClick = {
+                                    toDoViewModel.onEvent(ToDoEvent.InvertCheck)
                                     toDoViewModel.onEvent(ToDoEvent.Save(appState.appScope))
                                     appState.navHostController.popBackStack()
                                 }
                             ) {
-                                Icon(
-                                    imageVector = Icons.Filled.ArrowBack,
-                                    contentDescription = "Back"
+                                Text(
+                                    if (state.data.checked)
+                                        "Mark as incomplete"
+                                    else
+                                        "Mark as complete",
+                                    color = MaterialTheme.colors.onPrimary,
+                                    fontSize = 15.sp
                                 )
                             }
-                        }
-
-                        TextButton(
-                            onClick = {
-                                toDoViewModel.onEvent(ToDoEvent.InvertCheck)
-                                toDoViewModel.onEvent(ToDoEvent.Save(appState.appScope))
-                            }
-                        ) {
-                            Text(
-                                if (state.data.checked)
-                                    "Mark as incomplete"
-                                else
-                                    "Mark as complete"
-                            )
                         }
                     }
                 }
@@ -166,11 +187,11 @@ fun ToDoScreen(
                             .focusOrder(titleFocusRequester)
                             .focusRequester(titleFocusRequester),
                         placeholder = {
-                            Text("Title", fontSize = fontSize, fontWeight = fontWeight)
+                            Text("Title", fontSize = 25.sp, fontWeight = FontWeight.Bold)
                         },
                         textStyle = LocalTextStyle.current.copy(
-                            fontSize = fontSize,
-                            fontWeight = fontWeight
+                            fontSize = 25.sp,
+                            fontWeight = FontWeight.Bold
                         ),
                         colors = TextFieldDefaults.textFieldColors(
                             backgroundColor = Color.Transparent
@@ -198,6 +219,55 @@ fun ToDoScreen(
                             unfocusedIndicatorColor = Color.Transparent,
                             disabledIndicatorColor = Color.Transparent
                         ),
+                    )
+                }
+
+                if (selectingPriority) {
+                    SelectDialog(
+                        selectedIndex = state.data.priority.ordinal,
+                        options = ToDoPriority.values(),
+                        title = {
+                            Text(
+                                "Select priority",
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 20.sp
+                            )
+                        },
+                        onDismissRequest = {
+                            selectingPriority = false
+                        },
+                        onClick = { idx, selectedIdx, option ->
+                            toDoViewModel.onEvent(ToDoEvent.ChangePriority(option))
+                            selectingPriority = false
+                        },
+                        itemComponent = { idx, selectedIdx, option, onItemClick ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onItemClick() }
+                                    .padding(horizontal = 10.dp, vertical = 5.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = idx == selectedIdx,
+                                    onClick = onItemClick
+                                )
+                                Row(
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text = option.toString()
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Default.Flag,
+                                        contentDescription = "Priority $option",
+                                        tint = option.color
+                                    )
+                                }
+                            }
+                        }
                     )
                 }
             }

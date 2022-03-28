@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -14,11 +13,11 @@ import androidx.compose.ui.window.Dialog
 
 @Composable
 fun <T> SelectDialog(
-    selectedIndex: MutableState<Int>,
+    selectedIndex: Int,
     options: Array<T>,
     title: (@Composable () -> Unit)? = null,
     onDismissRequest: () -> Unit = {},
-    onClick: (Int) -> Unit = {},
+    onClick: (idx: Int, selectedIdx: Int, option: T) -> Unit,
     itemComponent: (@Composable (idx: Int, selectedIdx: Int, option: T, onItemClick: () -> Unit) -> Unit) =
         { idx, selectedIdx, option, onItemClick ->
             Row(
@@ -62,9 +61,8 @@ fun <T> SelectDialog(
                 Spacer(modifier = Modifier.height(5.dp))
                 LazyColumn {
                     items(options.size) { idx ->
-                        itemComponent(idx, selectedIndex.value, options[idx]) {
-                            selectedIndex.value = idx
-                            onClick(idx)
+                        itemComponent(idx, selectedIndex, options[idx]) {
+                            onClick(idx, selectedIndex, options[idx])
                         }
                     }
                 }
