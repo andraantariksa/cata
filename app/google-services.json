@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1031839735033",
+    "project_id": "andraantariksa-cata",
+    "storage_bucket": "andraantariksa-cata.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1031839735033:android:c4e36236b6a8a9962d1628",
+        "android_client_info": {
+          "package_name": "id.shaderboi.cata"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1031839735033-a24geuqmedof0a2m8gv6fqo679puguoa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuKlhzna4lOicVXNxyLe38JO3Rc17p4xQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1031839735033-a24geuqmedof0a2m8gv6fqo679puguoa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
