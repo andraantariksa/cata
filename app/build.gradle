@@ -3,6 +3,14 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id "dagger.hilt.android.plugin"
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
+}
+
+apply from: 'script/versioning.gradle'
+
+ext {
+    versionName = "0.0.1-dev"
 }
 
 android {
@@ -12,8 +20,8 @@ android {
         applicationId "id.shaderboi.cata"
         minSdk 21
         targetSdk 29
-        versionCode 1
-        versionName "1.0"
+        versionCode buildVersionCode(project.versionName)
+        versionName project.versionName
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -40,7 +48,6 @@ android {
 }
 
 dependencies {
-
     /// Jetpack compose
     implementation "androidx.compose.ui:ui:$composeVersion"
     // Tooling support (Previews, etc.)
@@ -98,8 +105,6 @@ dependencies {
 
     // Logger
     implementation 'com.jakewharton.timber:timber:5.0.1'
-
-    implementation "com.github.Sh4dowSoul.ComposePreferences:preferences-material3:0.1.4"
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.1'
