@@ -1,10 +1,11 @@
 package id.shaderboi.cata.di
 
-import android.app.Application
+import android.content.Context
 import androidx.room.Room
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import id.shaderboi.cata.feature_todo.data.data_source.ToDosDatabase
 import id.shaderboi.cata.feature_todo.data.repository.ToDoRepositoryImpl
@@ -17,8 +18,8 @@ import javax.inject.Singleton
 object AppModule {
     @Provides
     @Singleton
-    fun provideNoteDatabase(app: Application): ToDosDatabase {
-        return Room.databaseBuilder(app, ToDosDatabase::class.java, ToDosDatabase.NAME).build()
+    fun provideNoteDatabase(@ApplicationContext context: Context): ToDosDatabase {
+        return Room.databaseBuilder(context, ToDosDatabase::class.java, ToDosDatabase.NAME).build()
     }
 
     @Provides

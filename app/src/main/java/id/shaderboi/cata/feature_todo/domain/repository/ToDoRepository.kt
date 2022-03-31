@@ -1,7 +1,7 @@
 package id.shaderboi.cata.feature_todo.domain.repository
 
 import id.shaderboi.cata.feature_todo.domain.model.ToDo
-import id.shaderboi.cata.feature_todo.domain.util.ToDoOrder
+import id.shaderboi.cata.feature_todo.domain.model.sorting.ToDoOrder
 import kotlinx.coroutines.flow.Flow
 
 interface ToDoRepository {
@@ -9,7 +9,6 @@ interface ToDoRepository {
         orderField: ToDoOrder,
         searchQuery: String? = null
     ): Flow<List<ToDo>>
-
     suspend fun getToDo(id: Int): ToDo?
     suspend fun insertToDo(toDo: ToDo)
     suspend fun updateToDo(toDo: ToDo)

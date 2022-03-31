@@ -6,7 +6,7 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
-import id.shaderboi.cata.feature_todo.ui.util.LocalTheme
+import id.shaderboi.cata.feature_todo.ui.common.util.LocalTheme
 
 @Composable
 fun CataAppTheme(theme: Theme, content: @Composable () -> Unit) {

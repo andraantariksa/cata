@@ -61,7 +61,7 @@ dependencies {
 
     implementation "com.google.accompanist:accompanist-insets:0.23.0"
     implementation "androidx.datastore:datastore-preferences:1.0.0"
-    implementation "androidx.core:core-splashscreen:1.0.0-beta01"
+    implementation "androidx.core:core-splashscreen:1.0.0-beta02"
 
     // Lifecycle
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion"

@@ -2,8 +2,8 @@ package id.shaderboi.cata.feature_todo.data.repository
 
 import id.shaderboi.cata.feature_todo.data.data_source.ToDoDao
 import id.shaderboi.cata.feature_todo.domain.model.ToDo
+import id.shaderboi.cata.feature_todo.domain.model.sorting.ToDoOrder
 import id.shaderboi.cata.feature_todo.domain.repository.ToDoRepository
-import id.shaderboi.cata.feature_todo.domain.util.ToDoOrder
 import kotlinx.coroutines.flow.Flow
 
 class ToDoRepositoryImpl(

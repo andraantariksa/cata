@@ -3,7 +3,7 @@ package id.shaderboi.cata.feature_todo.data.data_source
 import androidx.room.*
 import androidx.sqlite.db.SimpleSQLiteQuery
 import id.shaderboi.cata.feature_todo.domain.model.ToDo
-import id.shaderboi.cata.feature_todo.domain.util.ToDoOrder
+import id.shaderboi.cata.feature_todo.domain.model.sorting.ToDoOrder
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -19,9 +19,8 @@ interface ToDoDao {
         var query = "SELECT * FROM todo"
         if (searchQuery != null) {
             query += " WHERE title LIKE '%' || :search_query || '%' OR" +
-                    " content LIKE '%' || :search_query || '%'"
+                    " description LIKE '%' || :search_query || '%'"
             args.add(searchQuery)
-//            args.add(searchQuery)
         }
         query += " ORDER BY ${orderField.toDoOrderField} ${orderField.order}"
         return getRawToDosFlow(SimpleSQLiteQuery(query, args.toArray()))

@@ -8,7 +8,5 @@ class GetToDoUseCase(
 ) {
     suspend operator fun invoke(
         id: Int
-    ): ToDo? {
-        return repository.getToDo(id)
-    }
+    ): ToDo? = repository.getToDo(id)
 }

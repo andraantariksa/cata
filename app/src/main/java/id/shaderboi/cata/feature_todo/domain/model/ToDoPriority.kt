@@ -2,7 +2,7 @@ package id.shaderboi.cata.feature_todo.domain.model
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import id.shaderboi.cata.feature_todo.ui.util.LocalTheme
+import id.shaderboi.cata.feature_todo.ui.common.util.LocalTheme
 import id.shaderboi.cata.ui.theme.Theme
 
 enum class ToDoPriority {
@@ -18,9 +18,9 @@ enum class ToDoPriority {
     val color
         @Composable
         get() = when (this) {
-            ToDoPriority.High -> Color(0xfff44336)
-            ToDoPriority.Medium -> Color(0xffffea00)
-            ToDoPriority.Low -> Color(0xff00b0ff)
+            High -> Color(0xfff44336)
+            Medium -> Color(0xffffea00)
+            Low -> Color(0xff00b0ff)
             else ->
                 if (LocalTheme.current == Theme.Light)
                     Color.Black

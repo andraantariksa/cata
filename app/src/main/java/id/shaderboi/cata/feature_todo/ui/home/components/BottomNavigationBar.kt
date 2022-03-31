@@ -6,9 +6,11 @@ import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.currentBackStackEntryAsState
-import id.shaderboi.cata.feature_todo.ui.home.HomeNavigationGraph
-import id.shaderboi.cata.feature_todo.ui.home.view_model.HomeState
+import id.shaderboi.cata.feature_todo.ui.home.common.HomeState
+import id.shaderboi.cata.feature_todo.ui.home.common.rememberHomeState
+import id.shaderboi.cata.feature_todo.ui.home.common.utils.HomeNavigationGraph
 
 @Composable
 fun BottomNavigationBar(homeState: HomeState) {
@@ -39,4 +41,10 @@ fun BottomNavigationBar(homeState: HomeState) {
             selectedContentColor = MaterialTheme.colors.onPrimary
         )
     }
+}
+
+@Preview
+@Composable
+private fun BottomNavigationBarPreview() {
+    BottomNavigationBar(homeState = rememberHomeState())
 }

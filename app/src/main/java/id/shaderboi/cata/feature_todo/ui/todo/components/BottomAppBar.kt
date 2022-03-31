@@ -9,8 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
+// Mostly coppied from androidx.compose.material.BottomAppBar
 private val AppBarHeight = 56.dp
 private val AppBarHorizontalPadding = 4.dp
 
@@ -51,4 +53,13 @@ fun BottomAppBar(
         }
         content()
     }
+}
+
+
+@Preview
+@Composable
+private fun BottomAppBarPreview() {
+    BottomAppBar(
+        navigationIcon = {}
+    ) {}
 }

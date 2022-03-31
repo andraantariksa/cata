@@ -8,7 +8,5 @@ class UpdateToDoUseCase(
 ) {
     suspend operator fun invoke(
         toDo: ToDo
-    ) {
-        repository.updateToDo(toDo)
-    }
+    ) = repository.updateToDo(toDo)
 }

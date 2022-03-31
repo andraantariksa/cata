@@ -5,17 +5,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
-import com.google.accompanist.insets.ProvideWindowInsets
 import dagger.hilt.android.AndroidEntryPoint
 import id.shaderboi.cata.feature_todo.ui.AppScreen
 import id.shaderboi.cata.ui.theme.CataAppTheme
 import id.shaderboi.cata.ui.theme.Theme
 import id.shaderboi.cata.util.ThemePref
 import id.shaderboi.cata.util.dataStore
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -36,14 +34,12 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun listenThemeChange() {
-        lifecycleScope.launch {
-            dataStore.data.collectLatest { pref ->
-                theme.value = when (pref[ThemePref.key]) {
-                    Theme.Dark.name ->  Theme.Dark
-                    // Default to light
-                    else -> Theme.Light
-                }
+        dataStore.data.onEach { pref ->
+            theme.value = when (pref[ThemePref.key]) {
+                Theme.Dark.name -> Theme.Dark
+                // Default to light
+                else -> Theme.Light
             }
-        }
+        }.launchIn(lifecycleScope)
     }
 }

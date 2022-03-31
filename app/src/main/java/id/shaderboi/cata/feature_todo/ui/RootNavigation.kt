@@ -5,8 +5,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import id.shaderboi.cata.feature_todo.ui.common.AppState
+import id.shaderboi.cata.feature_todo.ui.common.util.RootNavigationGraph
 import id.shaderboi.cata.feature_todo.ui.home.HomeScreen
-import id.shaderboi.cata.feature_todo.ui.todo.screen.ToDoScreen
+import id.shaderboi.cata.feature_todo.ui.todo.ToDoScreen
 
 @Composable
 fun RootNavigation(appState: AppState) {
