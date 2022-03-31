@@ -1,25 +1,20 @@
 package id.shaderboi.cata.feature_todo.ui.home.subscreen.todos
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.*
+import androidx.compose.material.BottomAppBar
+import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarResult
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.rememberLottieComposition
 import id.shaderboi.cata.R
+import id.shaderboi.cata.feature_todo.domain.util.Resource
 import id.shaderboi.cata.feature_todo.ui.common.AppState
+import id.shaderboi.cata.feature_todo.ui.common.components.AnimatedImageFull
 import id.shaderboi.cata.feature_todo.ui.common.rememberAppState
 import id.shaderboi.cata.feature_todo.ui.home.common.HomeState
 import id.shaderboi.cata.feature_todo.ui.home.common.rememberHomeState
@@ -27,6 +22,7 @@ import id.shaderboi.cata.feature_todo.ui.home.subscreen.todos.components.Floatin
 import id.shaderboi.cata.feature_todo.ui.home.subscreen.todos.components.ToDoItem
 import id.shaderboi.cata.feature_todo.ui.home.subscreen.todos.components.TopBar
 import id.shaderboi.cata.feature_todo.ui.home.subscreen.todos.components.sort_todo.SortToDoModal
+import id.shaderboi.cata.feature_todo.ui.home.subscreen.todos.view_model.ToDosEvent
 import id.shaderboi.cata.feature_todo.ui.home.subscreen.todos.view_model.ToDosUIEvent
 import id.shaderboi.cata.feature_todo.ui.home.subscreen.todos.view_model.ToDosViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -40,6 +36,8 @@ fun ToDosScreen(
     val scaffoldState = rememberScaffoldState()
 
     LaunchedEffect(Unit) {
+        toDosViewModel.onEvent(ToDosEvent.OnSearchTextChange(""))
+
         toDosViewModel.uiEvent.collectLatest { event ->
             when (event) {
                 is ToDosUIEvent.Snackbar -> {
@@ -75,70 +73,88 @@ fun ToDosScreen(
             BottomAppBar {}
         }
     ) {
-        if (toDosViewModel.toDosState.toDos.isEmpty() && toDosViewModel.toDosState.searchQuery.isBlank()) {
-            val emptyComposition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.empty))
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxHeight()
-            ) {
-                LottieAnimation(
-                    emptyComposition,
-                    iterations = LottieConstants.IterateForever,
-                    modifier = Modifier.height(300.dp),
-                )
-                Text(
-                    "There's nothing here",
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 25.sp,
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    "You can add a To Do by pressing the + button on the corner",
-                    textAlign = TextAlign.Center
-                )
-            }
-        } else if (toDosViewModel.toDosState.toDos.isEmpty() && toDosViewModel.toDosState.searchQuery.isNotBlank()) {
-            val notFoundComposition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.no_result_found))
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxHeight()
-            ) {
-                LottieAnimation(
-                    notFoundComposition,
-                    iterations = LottieConstants.IterateForever,
-                    modifier = Modifier.height(300.dp),
-                )
-                Text(
-                    "Nothing can be found",
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 25.sp,
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    "Maybe you have type the wrong query or... I don't know",
-                    textAlign = TextAlign.Center
-                )
-            }
+        if (toDosViewModel.toDosState.isSearching) {
+            ContentSearchedToDos(
+                appState = appState,
+                homeState = homeState,
+                toDosViewModel = toDosViewModel
+            )
         } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                items(toDosViewModel.toDosState.toDos.size) { toDoIdx ->
-                    ToDoItem(
-                        appState = appState,
-                        homeState = homeState,
-                        toDo = toDosViewModel.toDosState.toDos[toDoIdx],
-                        toDosViewModel = toDosViewModel
-                    )
-                }
-            }
+            ContentToDos(
+                appState = appState,
+                homeState = homeState,
+                toDosViewModel = toDosViewModel
+            )
         }
     }
 
     SortToDoModal(toDosViewModel = toDosViewModel)
+}
+
+@Composable
+fun ContentSearchedToDos(appState: AppState, homeState: HomeState, toDosViewModel: ToDosViewModel) {
+    when (val searchedToDos = toDosViewModel.toDosState.searchedToDos) {
+        is Resource.Error -> {
+            AnimatedImageFull(
+                R.raw.error,
+                "Uh oh",
+                "Something bad happening in our apps. Please try again"
+            )
+        }
+        is Resource.Loaded -> {
+            if (searchedToDos.data.isNotEmpty()) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    items(searchedToDos.data.size) { toDoIdx ->
+                        ToDoItem(
+                            appState = appState,
+                            homeState = homeState,
+                            toDo = searchedToDos.data[toDoIdx],
+                            toDosViewModel = toDosViewModel
+                        )
+                    }
+                }
+            } else {
+                AnimatedImageFull(
+                    R.raw.no_result_found,
+                    "Nothing can be found",
+                    "Maybe you have type the wrong query or... I don't know"
+                )
+            }
+        }
+        is Resource.Loading -> {
+            AnimatedImageFull(
+                R.raw.loading_box
+            )
+        }
+    }
+}
+
+@Composable
+fun ContentToDos(appState: AppState, homeState: HomeState, toDosViewModel: ToDosViewModel) {
+    if (toDosViewModel.toDosState.toDos.isNotEmpty()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            items(toDosViewModel.toDosState.toDos.size) { toDoIdx ->
+                ToDoItem(
+                    appState = appState,
+                    homeState = homeState,
+                    toDo = toDosViewModel.toDosState.toDos[toDoIdx],
+                    toDosViewModel = toDosViewModel
+                )
+            }
+        }
+    } else {
+        AnimatedImageFull(
+            R.raw.empty,
+            "There's nothing here",
+            "You can add a To Do by pressing the + button on the corner"
+        )
+    }
 }
 
 

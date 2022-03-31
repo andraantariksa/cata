@@ -41,7 +41,6 @@ fun CreateToDoOverlay(
     val descriptionFocusRequester = remember { FocusRequester() }
 
     var showSelectPriorityModal by remember { mutableStateOf(false) }
-    val selectedPriority = remember { mutableStateOf(0) }
 
     val density = LocalDensity.current
 
@@ -160,7 +159,7 @@ fun CreateToDoOverlay(
                                 Icon(
                                     imageVector = Icons.Default.Flag,
                                     contentDescription = "Select priority",
-                                    tint = ToDoPriority.values()[selectedPriority.value].color,
+                                    tint = createToDoViewModel.toDo.priority.color,
                                 )
                             }
 
@@ -196,7 +195,7 @@ fun CreateToDoOverlay(
 
     if (showSelectPriorityModal) {
         SelectDialog(
-            selectedIndex = selectedPriority.value,
+            selectedIndex = createToDoViewModel.toDo.priority.ordinal,
             options = ToDoPriority.values(),
             title = {
                 Text("Select priority", fontWeight = FontWeight.Medium, fontSize = 20.sp)
@@ -204,11 +203,11 @@ fun CreateToDoOverlay(
             onDismissRequest = {
                 showSelectPriorityModal = false
             },
-            onClick = { idx, selectedIdx, option ->
-                selectedPriority.value = idx
+            onClick = { idx, option ->
+                createToDoViewModel.onEvent(CreateToDoEvent.ChangedPriority(option))
                 showSelectPriorityModal = false
             },
-            itemComponent = { idx, selectedIdx, option, onItemClick ->
+            itemComponent = { idx, option, onItemClick ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -217,7 +216,7 @@ fun CreateToDoOverlay(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     RadioButton(
-                        selected = idx == selectedIdx,
+                        selected = option == createToDoViewModel.toDo.priority,
                         onClick = onItemClick
                     )
                     Row(

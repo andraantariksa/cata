@@ -1,10 +1,13 @@
 package id.shaderboi.cata.feature_todo.ui.home.subscreen.misc
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.BottomAppBar
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -13,21 +16,32 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import de.schnettler.datastore.compose.material3.PreferenceScreen
-import de.schnettler.datastore.compose.material3.model.Preference
+import androidx.hilt.navigation.compose.hiltViewModel
+import id.shaderboi.cata.BuildConfig
 import id.shaderboi.cata.feature_todo.ui.common.AppState
 import id.shaderboi.cata.feature_todo.ui.common.rememberAppState
 import id.shaderboi.cata.feature_todo.ui.home.common.HomeState
 import id.shaderboi.cata.feature_todo.ui.home.common.rememberHomeState
-import id.shaderboi.cata.ui.theme.Theme
-import id.shaderboi.cata.util.ThemePref
+import id.shaderboi.cata.feature_todo.ui.home.subscreen.misc.components.TextPreferenceWidget
+import id.shaderboi.cata.feature_todo.ui.home.subscreen.misc.components.ThemePreference
+import id.shaderboi.cata.feature_todo.ui.home.subscreen.misc.components.preference.Preference
+import id.shaderboi.cata.feature_todo.ui.home.subscreen.misc.components.preference.PreferenceGroupHeader
+import id.shaderboi.cata.feature_todo.ui.home.subscreen.misc.view_model.SettingsViewModel
 import id.shaderboi.cata.util.dataStore
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun MiscScreen(appState: AppState, homeState: HomeState) {
+fun MiscScreen(
+    appState: AppState,
+    homeState: HomeState,
+    settingsViewModel: SettingsViewModel = hiltViewModel()
+) {
     val context = LocalContext.current
     val dataStore = context.dataStore
+
+    LaunchedEffect(Unit) {
+        settingsViewModel.listen(dataStore)
+    }
 
     Scaffold(
         topBar = {
@@ -55,35 +69,19 @@ fun MiscScreen(appState: AppState, homeState: HomeState) {
             BottomAppBar {}
         }
     ) {
-        PreferenceScreen(
-            items = listOf(
-                Preference.PreferenceGroup(
-                    title = "Appearance",
-                    enabled = true,
-                    preferenceItems = listOf(
-                        Preference.PreferenceItem.ListPreference(
-                            request = ThemePref,
-                            title = "Theme",
-                            summary = "For those of you who can't stand in a daylight",
-                            singleLineTitle = true,
-                            icon = {
-                                Icon(
-                                    imageVector = Icons.Default.DarkMode,
-                                    contentDescription = "Dark mode"
-                                )
-                            },
-                            enabled = true,
-                            entries = mapOf(
-                                Theme.Light.name to "Light",
-                                Theme.Dark.name to "Dark"
-                            ),
-                        )
+        Column {
+            PreferenceGroupHeader("Appearance")
+            ThemePreference(appState = appState)
+            PreferenceGroupHeader("About")
+            TextPreferenceWidget(
+                preference = remember {
+                    Preference(
+                        title = "Version",
+                        description = BuildConfig.VERSION_NAME
                     )
-                )
-            ),
-            dataStore = dataStore,
-            modifier = Modifier
-        )
+                }
+            )
+        }
     }
 }
 

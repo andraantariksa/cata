@@ -28,7 +28,7 @@ fun SortToDoModal(
     toDosViewModel: ToDosViewModel,
 ) {
     AnimatedVisibility(
-        visible = toDosViewModel.isSortToDoModalOpened.value,
+        visible = toDosViewModel.isSortToDoModalOpened,
         enter = fadeIn(animationSpec = tween()),
         exit = fadeOut(animationSpec = tween()),
     ) {

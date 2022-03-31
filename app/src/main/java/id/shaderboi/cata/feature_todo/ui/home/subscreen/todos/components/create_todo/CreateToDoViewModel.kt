@@ -41,6 +41,11 @@ class CreateToDoViewModel @Inject constructor(
 
                 checkAddAvailability()
             }
+            is CreateToDoEvent.ChangedPriority -> {
+                _toDo = toDo.copy(
+                    priority = event.priority,
+                )
+            }
             is CreateToDoEvent.CreateToDo -> createToDo(event.onCompletion)
         }
     }

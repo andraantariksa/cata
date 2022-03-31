@@ -23,9 +23,9 @@ fun <T> SelectDialog(
     options: Array<T>,
     title: (@Composable () -> Unit)? = null,
     onDismissRequest: () -> Unit = {},
-    onClick: (idx: Int, selectedIdx: Int, option: T) -> Unit = { _, _, _ -> },
-    itemComponent: (@Composable (idx: Int, selectedIdx: Int, option: T, onItemClick: () -> Unit) -> Unit) =
-        { idx, selectedIdx, option, onItemClick ->
+    onClick: (idx: Int, option: T) -> Unit = { _, _ -> },
+    itemComponent: (@Composable (idx: Int, option: T, onItemClick: () -> Unit) -> Unit) =
+        { idx, option, onItemClick ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -34,7 +34,7 @@ fun <T> SelectDialog(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 RadioButton(
-                    selected = idx == selectedIdx,
+                    selected = idx == selectedIndex,
                     onClick = onItemClick
                 )
                 Text(
@@ -67,8 +67,8 @@ fun <T> SelectDialog(
                 Spacer(modifier = Modifier.height(5.dp))
                 LazyColumn {
                     items(options.size) { idx ->
-                        itemComponent(idx, selectedIndex, options[idx]) {
-                            onClick(idx, selectedIndex, options[idx])
+                        itemComponent(idx, options[idx]) {
+                            onClick(idx, options[idx])
                         }
                     }
                 }
@@ -86,7 +86,7 @@ private fun SelectDialogPreview() {
         title = {
             Text("Select priority", fontWeight = FontWeight.Medium, fontSize = 20.sp)
         },
-        itemComponent = { idx, selectedIdx, option, onItemClick ->
+        itemComponent = { idx, option, onItemClick ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -95,7 +95,7 @@ private fun SelectDialogPreview() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 RadioButton(
-                    selected = idx == selectedIdx,
+                    selected = idx == 0,
                     onClick = onItemClick
                 )
                 Row(

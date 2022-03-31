@@ -1,7 +1,6 @@
 package id.shaderboi.cata.feature_todo.ui.home.subscreen.todos.view_model
 
 import androidx.compose.material.SnackbarDuration
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,6 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import id.shaderboi.cata.feature_todo.domain.model.ToDo
 import id.shaderboi.cata.feature_todo.domain.model.sorting.ToDoOrder
 import id.shaderboi.cata.feature_todo.domain.use_case.ToDoUseCases
+import id.shaderboi.cata.feature_todo.domain.util.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -27,18 +27,16 @@ class ToDosViewModel @Inject constructor(
     private var _toDosState by mutableStateOf(ToDosState())
     val toDosState get() = _toDosState
 
+    private var _isSortToDoModalOpened by mutableStateOf(false)
+    val isSortToDoModalOpened get() = _isSortToDoModalOpened
+
     private var lastDeletedToDo: ToDo? = null
 
     private val _uiEvent = MutableSharedFlow<ToDosUIEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
 
-    private var getNotesJob: Job? = null
+    private var searchToDoJob: Job? = null
     private var searchInputNotesJob: Job? = null
-
-    private var deleteJob: Job? = null
-
-    private val _isSortToDoModalOpened = mutableStateOf(false)
-    val isSortToDoModalOpened: State<Boolean> = _isSortToDoModalOpened
 
     init {
         getToDo(toDosState.toDoOrder)
@@ -63,16 +61,25 @@ class ToDosViewModel @Inject constructor(
                 }
             }
             is ToDosEvent.OnSearchTextChange -> {
-                _toDosState = toDosState.copy(searchQuery = event.string)
+                val isSearching = event.string.isNotBlank()
+                _toDosState = toDosState.copy(
+                    searchQuery = event.string,
+                    isSearching = isSearching
+                )
 
                 searchInputNotesJob?.cancel()
-                searchInputNotesJob = viewModelScope.launch {
-                    delay(1000)
-                    getToDo(toDosState.toDoOrder, toDosState.searchQuery)
+
+                if (isSearching) {
+                    searchInputNotesJob = viewModelScope.launch {
+                        delay(1000)
+                        searchToDo(toDosState.toDoOrder, toDosState.searchQuery)
+                    }
                 }
             }
             is ToDosEvent.ToggleToDoCheck -> toggleToDoCheck(event.toDo)
-            ToDosEvent.ToggleSortToDoModal -> toggleSortModal()
+            ToDosEvent.ToggleSortToDoModal -> {
+                _isSortToDoModalOpened = !isSortToDoModalOpened
+            }
         }
     }
 
@@ -100,23 +107,30 @@ class ToDosViewModel @Inject constructor(
         )
     }
 
-    private fun getToDo(toDoOrder: ToDoOrder, _searchQuery: String? = null) {
-        getNotesJob?.cancel()
+    private fun searchToDo(toDoOrder: ToDoOrder, searchQuery: String) {
+        searchToDoJob?.cancel()
+        _toDosState = toDosState.copy(
+            searchedToDos = Resource.Loading(),
+        )
 
-        val searchQuery = _searchQuery?.ifBlank { null }
-
-        getNotesJob = viewModelScope.launch(Dispatchers.IO) {
+        searchToDoJob = viewModelScope.launch(Dispatchers.IO) {
             toDoUseCases
                 .getToDos(toDoOrder, searchQuery)
-                .collectLatest { toDos ->
+                .collectLatest { searchedToDos ->
                     _toDosState = toDosState.copy(
-                        toDos = toDos,
+                        searchedToDos = Resource.Loaded(searchedToDos),
                     )
                 }
         }
     }
 
-    private fun toggleSortModal() {
-        _isSortToDoModalOpened.value = !_isSortToDoModalOpened.value
+    private fun getToDo(toDoOrder: ToDoOrder) = viewModelScope.launch(Dispatchers.IO) {
+        toDoUseCases
+            .getToDos(toDoOrder, null)
+            .collectLatest { toDos ->
+                _toDosState = toDosState.copy(
+                    toDos = toDos,
+                )
+            }
     }
 }

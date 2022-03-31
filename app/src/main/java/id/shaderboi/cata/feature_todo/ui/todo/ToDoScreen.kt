@@ -233,11 +233,11 @@ fun ToDoScreen(
                         onDismissRequest = {
                             selectingPriority = false
                         },
-                        onClick = { idx, selectedIdx, option ->
+                        onClick = { idx, option ->
                             toDoViewModel.onEvent(ToDoEvent.ChangePriority(option))
                             selectingPriority = false
                         },
-                        itemComponent = { idx, selectedIdx, option, onItemClick ->
+                        itemComponent = { idx, option, onItemClick ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -246,7 +246,7 @@ fun ToDoScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 RadioButton(
-                                    selected = idx == selectedIdx,
+                                    selected = idx == state.data.priority.ordinal,
                                     onClick = onItemClick
                                 )
                                 Row(

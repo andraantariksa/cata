@@ -12,6 +12,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -27,11 +28,17 @@ fun SearchBar(
     toDosViewModel: ToDosViewModel,
     visible: Boolean,
     startCirclePosition: Offset = Offset(0.5f, 0.5f),
-    onBackPressedCallback: () -> Unit
+    onBackPressedCallback: (() -> Unit)? = null
 ) {
+    val onBack = remember(onBackPressedCallback, toDosViewModel) {
+        {
+            onBackPressedCallback?.invoke()
+            toDosViewModel.onEvent(ToDosEvent.OnSearchTextChange(""))
+        }
+    }
+
     BackHandler(visible) {
-        onBackPressedCallback()
-        toDosViewModel.onEvent(ToDosEvent.OnSearchTextChange(""))
+        onBack()
     }
 
     val circleRadius = animateFloatAsState(
@@ -49,7 +56,7 @@ fun SearchBar(
                 .padding(horizontal = 20.dp)
         ) {
             IconButton(
-                onClick = onBackPressedCallback,
+                onClick = onBack,
                 modifier = Modifier.padding(start = 5.dp)
             ) {
                 Icon(
@@ -82,5 +89,5 @@ fun SearchBar(
 @Preview
 @Composable
 private fun SearchBarPreview() {
-    SearchBar(toDosViewModel = hiltViewModel(), visible = true) {}
+    SearchBar(toDosViewModel = hiltViewModel(), visible = true)
 }

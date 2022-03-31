@@ -29,7 +29,14 @@ fun CataAppTheme(theme: Theme, content: @Composable () -> Unit) {
     }
 }
 
-sealed class Theme(val name: String) {
-    object Dark : Theme("dark")
-    object Light : Theme("light")
+enum class Theme {
+    Light,
+    Dark;
+
+    override fun toString(): String {
+        return when (this) {
+            Dark -> "Dark"
+            Light -> "Light"
+        }
+    }
 }
